@@ -7,6 +7,6 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-EXPOSE 8082
+EXPOSE 8081
 # start app
 CMD ["npm", "start"]
