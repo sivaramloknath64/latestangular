@@ -1,40 +1,74 @@
 pipeline {
-environment {
-registry = "sivaramloknath64/new"
-registryCredential = 'dockerhub'
-dockerImage = ''
-}
+  environment {
+    registry = "sivaramloknath64/angular"
+    registryCredential = 'docker_hub_loknath'
+    dockerImage = ''
+  }
 agent any
-  tools {nodejs "node"}
   
+  tools {nodejs "node8"}
+ 
 stages {
-stage('Cloning our Git') {
-steps {
-git 'https://github.com/sivaramloknath64/Angular-5-Sample-Demo.git'
-}
-}
 
+          stage('npm install package'){
+                steps{
+                  echo "installing the npm package "
+                    sh 'npm install'
+                         
+                     
+                    }
+            }
+                stage('Build'){
+                    steps{
+                      
+                        sh 'npm run build --prod'  
+                    }
+                }
+      
+   stage ('Build Docker Image') {
+      steps{
+        echo "Building Docker Image"
    
-stage('Building our image') {
-steps{
-script {
-dockerImage = docker.build registry + ":$BUILD_NUMBER"
-}
-}
-}
-stage('Deploy our image') {
-steps{
-script {
-docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
-dockerImage.push()
-}
-}
-}
-}
-stage('Cleaning up') {
-steps{
-sh "docker rmi $registry:$BUILD_NUMBER"
-}
-}
+        script {
+          dockerImage = docker.build registry + ":$BUILD_NUMBER"
+        }
+      
+      }
+    }
+
+
+   stage ('Push Docker Image') {
+      steps{
+        echo "Pushing Docker Image"
+        script {
+          docker.withRegistry( '', registryCredential ) {
+              dockerImage.push()
+              dockerImage.push('latest')
+          }
+        }
+      }
+    }
+  
+  
+    stage ('Deploy to dev Environment') {
+      steps{
+        echo "deploying to dev environment"
+        
+     sh "docker rm -f angulardemo || true"
+     sh " docker run -d --name=angulardemo -p 8083:8082 sivaramloknath64/angular"     
+              
+        
+        }
+      }
+  
+  
+  
+  
+  
+  
+   
+  
+  
+  
 }
 }
