@@ -1,5 +1,5 @@
 ### STAGE 1: Build ###
-FROM node:8-alpine
+FROM node:6-alpine
 WORKDIR /app
 COPY package.json package-lock.json ./
 
